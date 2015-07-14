@@ -1,0 +1,14 @@
+{
+  "id": "VID-FDS89FS",
+  "title": "Avoid future proofing with the JSON junk drawer",
+  "links": [
+    {
+      "rel": "youtube",
+      "href": "https://www.youtube.com/watch?v=9ZwMILFkMOw"
+    },
+    {
+      "rel": "self",
+      "href": "https://api.notgoodapis.com/v1"
+    }
+  ]
+} 

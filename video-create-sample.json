@@ -1,0 +1,9 @@
+{
+  "title": "New video",
+  "links": [
+    {
+      "rel": "youtube",
+      "href": "https://www.youtube.com/watch?v=9ZwMILFkMOw"
+    }        
+  ]
+}

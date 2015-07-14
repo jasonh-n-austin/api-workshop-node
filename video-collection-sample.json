@@ -1,0 +1,25 @@
+{ 
+  "totalPages": 1,
+  "items": [
+    {
+      "id": "VID-FDS89FS",
+      "title": "Avoid future proofing with the JSON junk drawer",
+      "links": [
+        {
+          "rel": "youtube",
+          "href": "https://www.youtube.com/watch?v=9ZwMILFkMOw"
+        }
+      ]
+    },
+    {
+      "id": "VID-EQWKL21DKA",
+      "title": "The future of code on demand",
+      "links": [
+        {
+          "rel": "youtube",
+          "href": "https://www.youtube.com/watch?v=9dfa931szfd12"
+        }
+      ]
+    }
+  ]
+}

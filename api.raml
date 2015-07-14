@@ -1,0 +1,268 @@
+#%RAML 0.8
+title: API Workshop API
+mediaType: application/json
+version: 1
+#baseUri: https://api.notgoodapis.com/v1
+baseUri: http://mocksvc.mulesoft.com/mocks/4d38d7c5-64dc-49ac-826a-e5847d72b837/v1
+
+securedBy: [ oauth_2_0 ]
+
+securitySchemes:
+    - oauth_2_0:
+        description: |
+            Supports OAuth 2.0 for authenticating all API requests.
+        type: OAuth 2.0
+        describedBy:
+            headers:
+                Authorization:
+                    description: |
+                       Used to send a valid OAuth 2 access token. Do not use 
+                       with the "access_token" query string parameter.
+                    type: string
+            queryParameters:
+                access_token:
+                    description: |
+                       Used to send a valid OAuth 2 access token. Do not use together with 
+                       the "Authorization" header
+                    type: string
+            responses:
+                401:
+                    description: |
+                        Bad or expired token. This can happen if the user is
+                        revoked or expired an access token. To fix, you should re-
+                        authenticate the user.
+                403:
+                    description: |
+                        Bad OAuth request (wrong consumer key, bad nonce, expired
+                        timestamp...). Unfortunately, re-authenticating the user won't help here.
+        settings:
+          authorizationUri: https://api.notgoodapis.com/v1/oauth2/authorize
+          accessTokenUri: https://api.notgoodapis.com/v1/oauth2/token
+          authorizationGrants: [ code, token ]
+
+resourceTypes:
+  - collection:
+      description: Collection of available <<resourcePathName>> in API Workshop.
+      get:
+        description: Get a list of <<resourcePathName>>.
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  <<exampleCollection>>
+      post:
+        description: |
+          Add a new <<resourcePathName|!singularize>> to API Workshop.
+        body:
+          application/json:
+            schema: <<resourcePathName|!singularize>>
+            example: |
+              <<exampleItem>>
+            
+        responses:
+          201:
+            description: If <<resourcePathName>> is created, `Location` header will indicate URL of newly created resource.
+          400:
+            body:
+              application/json:
+                example: |
+                  {"message": "Validation error creating <<resourcePathName|!singularize>>" }
+                
+                 
+  - collection-item:
+      description: A specific <<resourcePathName|!singularize>>
+      get:
+        description: |
+          Get the <<resourcePathName|!singularize>>
+          with id =
+          {<<resourcePathName|!singularize>>Id}
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  <<exampleItem>>
+          404:
+            body:
+              application/json:
+                example: |
+                  {"message": "<<resourcePathName|!singularize>> not found" }
+      put:
+        description: |
+            Update the <<resourcePathName|!singularize>>
+            with id = {<<resourcePathName|!singularize>>Id}
+        body:
+#          application/json:
+#            <<exampleItem>>
+        responses:
+          204: 
+            description: |
+              When the <<resourcePathName|!singularize>> is updated there will be no response body.
+          404:
+            body:
+              application/json:
+                example: |
+                  {"message": "<<resourcePathName|!singularize>> not found" }
+      delete:
+        description:
+          Delete the <<resourcePathName|!singularize>>
+          with id = {<<resourcePathName|!singularize>>Id}
+        responses:
+          204:
+            description:
+              When the <<resourcePathName|!singularize>> is deleted there will be no response body.
+          404:
+            body:
+              application/json:
+                example: |
+                  {"message": "<<resourcePathName|!singularize>> not found" }  
+  
+  - action-temporal:
+      description: An action which does not persist or change resource state
+      post:
+        body:
+          application/json:
+            example: |
+              <<exampleRequest>>
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  <<exampleResponse>>
+          400:
+            body:
+              application/json:
+                example: |
+                  {"message": "Request validation error" }
+
+traits:
+  - orderable:
+      queryParameters:
+        orderBy:
+          description: |
+            Order by field: <<fieldsList>>
+          type: string
+          required: false
+        order:
+          description: Order
+          enum: [desc, asc]
+          default: desc
+          required: false
+  - pageable:
+      queryParameters:
+        offset:
+          description: Skip over a number of elements by specifying an offset value for the query
+          type: integer
+          required: false
+          example: 20
+          default: 0
+        limit:
+          description: Limit the number of elements on the response
+          type: integer
+          required: false
+          example: 80
+          default: 10
+  - projectable:
+      queryParameters:
+        fields:
+          description: A comma-delimited list of fields to include; all others will be excluded, e.g. ?fields=title, description
+
+/videos:
+  get:
+    is: [
+      projectable,
+      orderable: {fieldsList: "title"},
+      pageable
+    ]   
+  type: 
+    collection:
+      exampleCollection: !include video-collection-sample.json
+      exampleItem: !include video-create-sample.json
+            
+  /{videoId}:
+    get:
+      is:
+        [ projectable ]
+    type: 
+      collection-item:
+       exampleItem: !include video-item-sample.json
+        
+    
+    /promote:
+      description: Sends promotional messages to selected targets for the specified video. Twitter, Facebook, and LinkedIn supported.
+      type:
+        action-temporal:
+          exampleRequest: |
+            {
+            "targets": [ "TWITTER", "FACEBOOK", "LINKEDIN" ],
+            "schedule": {
+              "beginsAt": "2015-03-04T07:30:00+0500"
+            }            
+          exampleResponse: |
+            {
+              "targetStatus": {
+                "twitter": "TWEET_SENT",
+                "faceBook": "POSTED",
+                "linkedIn": "POSTED"
+              ]
+            }
+            
+/blogs:
+  get:
+    is: [ 
+      orderable: {fieldsList: "title"},
+      projectable,
+      pageable
+    ]
+  type:
+    collection:
+      exampleCollection: |
+        {
+          "items": [
+            {
+              "id": "BLG-32jkl321jkl",
+              "title": "Who makes the best API product managers?"
+              "links": [
+                {
+                  "rel": "apiux",
+                  "link": "http://apiux.com/2013/04/09/api-product-manager"
+                }
+              ]
+            }
+          ]
+        }
+      exampleItem: |
+        {
+          "title": "An amazing new discovery in APIs",
+          "links": [
+            {
+              "rel": "apiux",
+              "link": "http://apiux.com/2015/04/01/new-discovery"
+            }
+          ]
+        }
+      
+  /{blogId}:
+    type:
+      collection-item:
+        exampleItem: !include blog-item-sample.json
+          
+    /comments:
+      type:
+        collection:
+          exampleCollection: |
+            {
+            }
+          exampleItem: |
+            {
+            }
+
+      /{commentId}:
+        type: 
+          collection-item:
+            exampleItem: |
+              {
+              }    
+
